@@ -1,0 +1,34 @@
+
+# conda create -n gkvm python=3.8.5
+
+# install torch
+
+conda install pytorch==2.3.0 torchvision==0.18.0 torchaudio==2.3.0 pytorch-cuda=11.8 -c pytorch -c nvidia
+
+# install opencv
+
+pip install opencv-python-headless
+
+
+
+# ipython
+
+pip install ipython
+
+
+# install other libs (tsp2 is installed automatically)
+
+pip install gpytorch==1.5.0  
+pip install matplotlib
+
+
+
+# to run
+
+ipython demo.py
+
+
+
+# loop_with_corridor_.pgm 은 바깥쪽 unknown padding 영역이 너무 작아서 많이 잘라낼 수 없어
+다른 맵들 보다 더 큼. 결과적으로 똑같은 kernel_scale 값으로 돌렸을 경우 waypoint 추출에 실패함.
+
