@@ -39,13 +39,16 @@ def main(argv):
     #filename = 'data/room_with_corner_.pgm'
 
     if(len(sys.argv) != 2):
-        print("num sys argv %d"%len(sys.argv))
-        print("usage: %s <config file path>" % sys.argv[0])
+        print("\n\n\n")
+        print("num sys argv is wrong !!!")
+        print("usage: %s <config file path> \n" % sys.argv[0])
         return -1
     filename = sys.argv[1]
+    num_samples = 100
+    num_ds = 1  # num of downsample
     #  map_visited, init_uncertainty = load_map("data/observations.pickle")
     map_visited, init_uncertainty = utils.load_gkvm_map_from_gmapimg( filename,
-                                                                    ukn = 205, free = 254, occ = 0, num_ds =1 )
+                                                                    ukn = 205, free = 254, occ = 0, num_ds = num_ds )
 
     # fig, ax= plt.subplots(1,2)
     # ax[0].imshow(map_visited)
@@ -59,9 +62,6 @@ def main(argv):
     y = np.zeros(len(X))
     #print(X.shape, y.shape)
 
-    # ## 2. Create GP model to represent uncertainty, and do MPE sampling.
-    # In[4]:
-    num_samples = 100
 
     config = {
         "kernel_scale": 8,   # increase kernel scale if img size is greater than 100x100
@@ -72,9 +72,11 @@ def main(argv):
     mesh = np.vstack([X.ravel()[None,:], Y.ravel()[None,:]]).T
     mpe_samples = MPE_k(gpr, mesh, k=num_samples)  # num sample is a variable
 
-    # ## 3. solving TSP problem based on MPE landmarks
+    # upsample mpe_samples
+    if num_ds > 0:
+        mpe_samples = mpe_samples * (2 ** num_ds )
 
-    # In[7]:
+    # ## 3. solving TSP problem based on MPE landmarks
 
     # add the initial location of the robot
     init_pos = mpe_samples[0] #np.array([1,1])
@@ -91,7 +93,8 @@ def main(argv):
     print(path)
 
     path_len = 0.0
-    plt.imshow(init_uncertainty, origin='lower')
+    map_img = cv2.imread(filename)
+    plt.imshow(map_img, origin='lower')
     plt.plot( init_pos[0], init_pos[1], 'bo', markersize=10)
     for i in range(len(path)-1):
         x1,y1 = landmarks[path[i]]
